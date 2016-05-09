@@ -1,0 +1,24 @@
+<div class="container">
+<h1>指数计算结果</h1>
+
+<table id="result" class="table-bordered">
+    <thead>
+        <th>个体号</th>
+        <th>产仔数</th>
+        <th>达100KG日龄</th>
+        <th>校正背腰</th>
+        <th>产仔数EBV</th>
+        <th>日龄EBV</th>
+        <th>校正背腰EBV</th>
+        <th>指数1</th>
+        <th>指数2</th>
+    </thead>
+
+    <tbody>
+        {{#each profiles}}
+            {{{tablerow this}}}
+        {{/each}}
+    </tbody>
+</table>
+
+</div>
