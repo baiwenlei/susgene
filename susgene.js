@@ -7,13 +7,14 @@ var upload = multer({ dest: 'uploads/', limits:{fileSize:5*1024*1024}});
 
 var app = express();
 var Profile = require('./profile');
-var indexCalc = require('./calc');
+var compute = require('./compute');
 
 var handlebars = require('express-handlebars').create({
-    defaultLayout: 'main'
+    defaultLayout: 'main',
+    extname: '.hbs'
 });
-app.engine('handlebars', handlebars.engine);
-app.set('view engine', 'handlebars');
+app.engine('hbs', handlebars.engine);
+app.set('view engine', 'hbs');
 app.set('views', __dirname+'/views');
 app.set('port', process.env.port||3000);
 
@@ -30,29 +31,32 @@ app.post('/', function(req, res, next) {
             throw err;
         }
 
-        var profiles = [];
-        var parseErr = [];
-        var article = data.toString();
-        var lines = article.split(/[\r\n]+/);
-        lines.forEach((line, i, array) => {
-            var profile = line && Profile.createFromString(line);
-            profile && profiles.push(profile);
-        });
+        var profile = new Profile();
+        profile.loadFromString(data.toString());
 
-        profiles && indexCalc(profiles);
+        var result = compute(profile);
 
-        res.locals.profiles = profiles;
+        res.locals.names = profile.colums[0];
+        res.locals.index1 = result[0];
+        res.locals.index2 = result[1];
         res.render('result', {
             helpers: {
-                tablerow: function(profile) {
-                    var str = '<tr><td>';
-                    str += profile.toArray().join('</td><td>');
-                    str += '</td></tr>'
+                result_table: function(names, index1, index2) {
+                    var str = "";
+
+                     names.forEach((name, i) => {
+                        str += '<tr>';
+                        str += '<td>' + name + '</td>';
+                        str += '<td>' + index1[i] + '</td>';
+                        str += '<td>' + index2[i] + '</td>';
+                        str += '</tr>'
+                    });
 
                     return str;
                 }
             }
         });
+
 
         fs.unlink(file, err => {});
     });

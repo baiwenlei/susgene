@@ -2,45 +2,37 @@
 //
 "use strict";
 
-var schema = ["childCount", "days", "fixedBB", "ccEbv", "daysEbv", "fixEbv"];
-
 class PigProfile {
     constructor() {
-        this.name = "temp";
-        schema.forEach(item => this[item]=0);
+        this.colums = [];
+        this.result = [];
     }
 
-    static createFromString(str) {
+    loadFromString(str) {
         if(!str) {
-            return null;
+            return;
         }
 
-        var fields = str.split(/[\s,|]+/);
-        if(!fields) {
-            return null;
-        }
-
-        var profile = new PigProfile();
-        profile.name = fields.shift();
-
-        for(var i=0; i<schema.length && i<fields.length; ++i) {
-            var number = Number.parseFloat(fields[i]);
-            if(isNaN(number)) {
-                return null;
+        var self = this;
+        var lines = str.split(/[\r\n]+/);
+        lines.forEach((line, i) => {
+            var fields = line.split(/[\s,|]+/);
+            if(!fields) {
+                return;
             }
-            profile[schema[i]] = Number.parseFloat(fields[i]);
-        }
-        return profile;
-        // console.log(profile);
-    }
 
-    toArray() {
-        var array = [this.name];
-        schema.forEach(popName => array.push(this[popName]));
-        array.push(this.index1.toFixed(3));
-        array.push(this.index2.toFixed(3));
+            fields.forEach((item, i) => {
+                if(!self.colums[i]) {
+                    self.colums[i] = [];
+                }
 
-        return array;
+                self.colums[i].push(item);
+            });
+        });
+
+        // console.log(self);
+
+        return;
     }
 };
 
