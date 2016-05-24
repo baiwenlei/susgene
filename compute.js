@@ -81,19 +81,19 @@ function computeRelWeight(inputData, param) {
     var invG = jStat.inv(matG);
     // console.log("invG", invG);
     var mat = jStat.multiply(matP, invG);
-    console.log("mat: ", mat);
+    // console.log("mat: ", mat);
 
     var avr = inputData.map(item => {
         return jStat.mean(item);
     });
 
-    console.log("avr: ", avr);
+    // console.log("avr: ", avr);
     var rx = computeRx(avr, param);
-    console.log("Rx: ", rx);
+    // console.log("Rx: ", rx);
     var vec = jStat.multiply(rx, invG);
-    console.log("mat * rx", vec);
+    // console.log("mat * rx", vec);
     var relWeight = jStat.multiply(vec, mat);
-    console.log("relative weight1: ", relWeight);
+    // console.log("relative weight1: ", relWeight);
 
     // debugger;
     return relWeight[0];
@@ -120,7 +120,7 @@ function computeMatP(devs, mat) {
         }
     }
 
-    console.log(matP);
+    // console.log(matP);
 
     return matP;
 }
@@ -136,7 +136,7 @@ function computeMatG(devs, mat) {
         }
     }
 
-    console.log("matG: ", matG);
+    // console.log("matG: ", matG);
 
     return matG;
 }

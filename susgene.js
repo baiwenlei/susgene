@@ -46,6 +46,7 @@ app.post('/', function(req, res, next) {
 
                      names.forEach((name, i) => {
                         str += '<tr>';
+                        str += '<td>' + (i+1) + '</td>';
                         str += '<td>' + name + '</td>';
                         str += '<td>' + index1[i] + '</td>';
                         str += '<td>' + index2[i] + '</td>';
