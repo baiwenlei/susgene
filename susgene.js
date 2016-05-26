@@ -28,38 +28,41 @@ app.post('/', function(req, res, next) {
     var file = req.file.path;
     fs.readFile(file, (err, data) => {
         if (err) {
-            throw err;
+            return next(err);
         }
 
-        var profile = new Profile();
-        profile.loadFromString(data.toString());
+        try {
+            var profile = new Profile();
+            profile.loadFromString(data.toString());
 
-        var result = compute(profile);
+            var result = compute(profile);
 
-        res.locals.names = profile.colums[0];
-        res.locals.index1 = result[0];
-        res.locals.index2 = result[1];
-        res.render('result', {
-            helpers: {
-                result_table: function(names, index1, index2) {
-                    var str = "";
+            res.locals.names = profile.colums[0];
+            res.locals.index1 = result[0];
+            res.locals.index2 = result[1];
+            res.render('result', {
+                helpers: {
+                    result_table: function(names, index1, index2) {
+                        var str = "";
 
-                     names.forEach((name, i) => {
-                        str += '<tr>';
-                        str += '<td>' + (i+1) + '</td>';
-                        str += '<td>' + name + '</td>';
-                        str += '<td>' + index1[i] + '</td>';
-                        str += '<td>' + index2[i] + '</td>';
-                        str += '</tr>'
-                    });
+                         names.forEach((name, i) => {
+                            str += '<tr>';
+                            str += '<td>' + (i+1) + '</td>';
+                            str += '<td>' + name + '</td>';
+                            str += '<td>' + index1[i] + '</td>';
+                            str += '<td>' + index2[i] + '</td>';
+                            str += '</tr>'
+                        });
 
-                    return str;
+                        return str;
+                    }
                 }
-            }
-        });
+            });
 
-
-        fs.unlink(file, err => {});
+            fs.unlink(file, err => {});
+        } catch(err) {
+            next(err);
+        }
     });
 });
 
