@@ -61,6 +61,37 @@
         <script src="js/plugins.js"></script>
         <script src="js/file-input/fileinput.min.js"></script>
         <script src="js/main.js"></script>
+        <script>
+            $("#file-0a").change(function(event) {
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    colums = [];
+                    // console.log(reader.result);
+                    var rawContent = reader.result;
+
+                    var lines = rawContent.split(/[\r\n]+/);
+                    lines.forEach((line, i) => {
+                        var fields = line.split(/[\s,|]+/);
+                        if(!fields) {
+                            return;
+                        }
+
+                        fields.forEach((item, i) => {
+                            if(!colums[i]) {
+                                colums[i] = [];
+                            }
+
+                            colums[i].push(item);
+                        });
+                    });
+
+                    var indexNum = (colums.length-1)/2;
+
+                    console.log(indexNum);
+                };
+                reader.readAsText(event.target.files[0]);
+            });
+        </script>
 
         <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
         <!-- <script>
