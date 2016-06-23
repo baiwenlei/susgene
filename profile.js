@@ -29,9 +29,7 @@ class PigProfile {
                 self.colums[i].push(item);
             });
         });
-
-        // console.log(self);
-
+        
         return;
     }
 };
