@@ -151,8 +151,8 @@
                         str += "<tr>";
                         str += `<th>${i+1}</th>`;
                         str += `<td>${val}</td>`;
-                        str += `<td><input id="target-${i}" name="target-${i}" type="number"></td>`;
-                        str += `<td><input id="gen-${i}" name="gen-${i}" type="number"></td>`;
+                        str += `<td><input id="target-${i}" name="target-${i}" type="number" step="any" min="0"></td>`;
+                        str += `<td><input id="gen-${i}" name="gen-${i}" type="number" step="any" min="1"></td>`;
                         str += "</tr>";
                     });
 
@@ -180,7 +180,7 @@
                     for (var i = 0; i < dim; i++) {
                         str += "<tr>";
                         for (var j = 0; j < dim; j++) {
-                            str += `<td><input id="m-${i}-${j}" name="m-${i}-${j}" type="number"></td>`;
+                            str += `<td><input id="m-${i}-${j}" name="m-${i}-${j}" type="number" step="any"></td>`;
                         }
                         str += "</tr>";
                     }
