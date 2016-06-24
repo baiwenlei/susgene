@@ -2,6 +2,7 @@ var fs = require('fs');
 var express = require('express');
 var bodyparser = require('body-parser');
 var multer = require('multer');
+var jStat = require('jStat').jStat;
 
 var upload = multer({ dest: 'uploads/', limits:{fileSize:5*1024*1024}});
 
@@ -25,6 +26,8 @@ app.use(bodyparser.urlencoded({extended: true}));
 app.use(upload.single('input-file'));
 
 app.post('/', function(req, res, next) {
+    var paramConfig = bodyToConfig(req.body);
+
     var file = req.file.path;
     fs.readFile(file, (err, data) => {
         if (err) {
@@ -35,7 +38,7 @@ app.post('/', function(req, res, next) {
             var profile = new Profile();
             profile.loadFromString(data.toString());
 
-            var result = compute(profile);
+            var result = compute(profile, paramConfig);
 
             res.locals.names = profile.colums[0];
             res.locals.index1 = result[0];
@@ -80,3 +83,41 @@ app.use(function(err, req, res, next) {
 app.listen(app.get('port'), function() {
     console.log('Express server stated on http://localhost:'+app.get('port')+';');
 });
+
+function bodyToConfig(body) {
+    var target=[], generation=[], mat=[];
+    for(var key in body) {
+        var parts = key.split('-');
+        var i = parseInt(parts[1]);
+        var val = parseFloat(body[key]);
+
+        switch (parts[0]) {
+            case "target":
+                target[i] = val;
+                break;
+
+            case "gen":
+                generation[i] = val;
+                break;
+
+            case "m":
+                var j = parseInt(parts[2]);
+                mat[i] = (mat[i] || []);
+                mat[i][j] = val;
+                break;
+            default:
+                // console.error();
+                break;
+        }
+    }
+
+    var config = {
+        mat : jStat(mat),
+        goal: target,
+        generation: generation
+    };
+
+    // console.log(config);
+
+    return config;
+}

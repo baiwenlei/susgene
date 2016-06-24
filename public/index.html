@@ -25,30 +25,31 @@
             <h1>根据育种目标选择计算指数</h1>
             </div>
             <form enctype="multipart/form-data" method="post">
-                <input id="file-0a" class="file" type="file" name="input-file" multiple data-min-file-count="1">
-                <br>
+                <input id="file-0a" class="file" type="file" name="input-file" multiple accept="text/csv, text/plain" data-min-file-count="1"><br>
                 <button type="submit" class="btn btn-primary">Submit</button>
                 <button type="reset" class="btn btn-default">Reset</button>
                 <hr>
 
-                <h5>配置参数</h5>
+                <div id="config">
+                <h5>配置目标</h5>
                 <div class="row well">
-                    <div class="col-sm-4">
-                    <lable for="index-count">指定指标个数: </lable>
-                    <select class="form-control" id="index-count" name="index-count">
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                    </select>
-                    </div>
-                    <div class="col-sm-4"></div>
-                    <div class="col-sm-4">
-                        <label for="configure-param">
-                            矩阵：<input type="checkbox" value="true">
-                        </label>
+                    <div class="col-md-8">
+                        <table class="table table-striped table-hover">
+                        <thead>
+                            <tr><th>性状序号</th><th>基础数据</th><th>育种目标</th><th>选择世代</th></tr>
+                        </thead>
+                        <tbody id="target"></tbody>
+                        </table>
                     </div>
                 </div>
 
+                <h5>配置矩阵</h5>
+                <div class="row well">
+                    <div class="col-md-8">
+                        <table class="table table-striped table-hover" id="matrix"></table>
+                    </div>
+                </div>
+                </div>
 
             </form>
         </div>
@@ -61,15 +62,148 @@
         <script src="js/plugins.js"></script>
         <script src="js/file-input/fileinput.min.js"></script>
         <script src="js/main.js"></script>
+        <script>
+            $(document).ready(function() {
+                var gLastConfig = {
+                    dim: 0,
+                    targets: [],
+                    matrix: []
+                };
 
-        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
-        <!-- <script>
-            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
-            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
-            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
-            e.src='https://www.google-analytics.com/analytics.js';
-            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
-            ga('create','UA-XXXXX-X','auto');ga('send','pageview');
-        </script> -->
+                var defaultConfig = {
+                    mat: [
+                        [0.11,   -0.01,   -0.01,   0.1],
+                        [0.33,   0.29,    -0.01,   -0.4],
+                        [0.03,   -0.03,   0.49,    0.04],
+                        [0.03,   -0.4,    0.14,    0.36]
+                    ],
+                    target: [10.7, 167, 11.2, 2.56],
+                    generation: [10, 10, 10, 10]
+                };
+
+                $("#file-0a").change(function(event) {
+                    var reader = new FileReader();
+                    reader.onload = function(event) {
+                        colums = [];
+                        // console.log(reader.result);
+                        var rawContent = reader.result;
+                        var lines = rawContent.split(/[\r\n]+/);
+                        lines.forEach(function(line, i){
+                            var fields = line.split(/[\s,;|]+/);
+                            if(!fields) {
+                                return;
+                            }
+
+                            fields.forEach(function(item, i) {
+                                if(!colums[i]) {
+                                    colums[i] = [];
+                                }
+                                colums[i].push(item);
+                            });
+                        });
+
+                        var inputData = [];
+                        colums.forEach(function(item, i) {
+                            if(i == 0) return;
+
+                            if(!inputData[i-1]) inputData[i-1] = [];
+
+                            item.forEach(function(str) {
+                                inputData[i-1].push(parseFloat(str));
+                            });
+                        });
+
+                        if(1&inputData.length || inputData.length<2) {
+                            return;
+                        }
+
+                        if (gLastConfig.dim != inputData.length/2) {
+                            $("#target").empty();
+                            $("#matrix").empty();
+
+                            gLastConfig.dim = inputData.length/2;
+
+                            createTargetTable(computeBaseAvr(inputData));
+                            createMatrix(inputData.length/2);
+                        }
+                    };
+                    reader.readAsText(event.target.files[0]);
+                });
+
+                function computeBaseAvr(data) {
+                    var base = [];
+                    data.forEach(function(traitDatas, i, array) {
+                        if (i >= array.length/2) {
+                            return;
+                        }
+
+                        var sum = traitDatas.reduce(function(sum, item) {return sum+item}, 0);
+                        base.push(sum / traitDatas.length);
+                    });
+
+                    return base;
+                }
+
+                function createTargetTable(base) {
+                    var str = "";
+                    base.forEach(function(item, i) {
+                        var val = item.toFixed(2);
+                        str += "<tr>";
+                        str += `<th>${i+1}</th>`;
+                        str += `<td>${val}</td>`;
+                        str += `<td><input id="target-${i}" name="target-${i}" type="number" step="any" min="0"></td>`;
+                        str += `<td><input id="gen-${i}" name="gen-${i}" type="number" step="any" min="1"></td>`;
+                        str += "</tr>";
+                    });
+
+                    $("#target").append(str);
+
+                    var defDim = Math.min(base.length, defaultConfig.mat.length);
+                    for (var i = 0; i < defDim; i++) {
+                        $(`#target-${i}`).val(defaultConfig.target[i]);
+                        $(`#gen-${i}`).val(defaultConfig.generation[i]);
+                    }
+
+                    gLastConfig.targets.forEach(function(obj) {
+                        $(`#${obj.name}`).val(obj.value);
+                    });
+
+                    $("#target input").on('input', function(event) {
+                        gLastConfig.targets = $("#target input").serializeArray();
+                    });
+                }
+
+
+
+                function createMatrix(dim) {
+                    var str = "";
+                    for (var i = 0; i < dim; i++) {
+                        str += "<tr>";
+                        for (var j = 0; j < dim; j++) {
+                            str += `<td><input id="m-${i}-${j}" name="m-${i}-${j}" type="number" step="any"></td>`;
+                        }
+                        str += "</tr>";
+                    }
+
+                    $("#matrix").append(str);
+
+                    var defDim = Math.min(dim, defaultConfig.mat.length);
+                    for (var i = 0; i < defDim; i++) {
+                        for (var j = 0; j < defDim; j++) {
+                            $(`#m-${i}-${j}`).val(defaultConfig.mat[i][j]);
+                        }
+                    }
+
+                    gLastConfig.matrix.forEach(function(obj) {
+                        $(`#${obj.name}`).val(obj.value);
+                    });
+
+                    $("#matrix input").on('input', function(event) {
+                        gLastConfig.matrix = $("#matrix input").serializeArray();
+                    });
+                }
+
+            });
+        </script>
     </body>
 </html>

@@ -16,7 +16,7 @@ class PigProfile {
         var self = this;
         var lines = str.split(/[\r\n]+/);
         lines.forEach((line, i) => {
-            var fields = line.split(/[\s,|]+/);
+            var fields = line.split(/[\s,;|]+/);
             if(!fields) {
                 return;
             }
@@ -29,8 +29,6 @@ class PigProfile {
                 self.colums[i].push(item);
             });
         });
-
-        // console.log(self);
 
         return;
     }
