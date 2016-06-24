@@ -88,13 +88,13 @@
                         // console.log(reader.result);
                         var rawContent = reader.result;
                         var lines = rawContent.split(/[\r\n]+/);
-                        lines.forEach((line, i) => {
-                            var fields = line.split(/[\s,|]+/);
+                        lines.forEach(function(line, i){
+                            var fields = line.split(/[\s,;|]+/);
                             if(!fields) {
                                 return;
                             }
 
-                            fields.forEach((item, i) => {
+                            fields.forEach(function(item, i) {
                                 if(!colums[i]) {
                                     colums[i] = [];
                                 }
@@ -103,12 +103,12 @@
                         });
 
                         var inputData = [];
-                        colums.forEach((item, i) => {
+                        colums.forEach(function(item, i) {
                             if(i == 0) return;
 
                             if(!inputData[i-1]) inputData[i-1] = [];
 
-                            item.forEach(str => {
+                            item.forEach(function(str) {
                                 inputData[i-1].push(parseFloat(str));
                             });
                         });
@@ -132,12 +132,12 @@
 
                 function computeBaseAvr(data) {
                     var base = [];
-                    data.forEach((traitDatas, i, array) => {
+                    data.forEach(function(traitDatas, i, array) {
                         if (i >= array.length/2) {
                             return;
                         }
 
-                        var sum = traitDatas.reduce((sum, item)=>{return sum+item}, 0);
+                        var sum = traitDatas.reduce(function(sum, item) {return sum+item}, 0);
                         base.push(sum / traitDatas.length);
                     });
 
@@ -146,7 +146,7 @@
 
                 function createTargetTable(base) {
                     var str = "";
-                    base.forEach((item, i)=> {
+                    base.forEach(function(item, i) {
                         var val = item.toFixed(2);
                         str += "<tr>";
                         str += `<th>${i+1}</th>`;
@@ -164,11 +164,11 @@
                         $(`#gen-${i}`).val(defaultConfig.generation[i]);
                     }
 
-                    gLastConfig.targets.forEach(obj => {
+                    gLastConfig.targets.forEach(function(obj) {
                         $(`#${obj.name}`).val(obj.value);
                     });
 
-                    $("#target input").on('input', (event)=>{
+                    $("#target input").on('input', function(event) {
                         gLastConfig.targets = $("#target input").serializeArray();
                     });
                 }
@@ -194,11 +194,11 @@
                         }
                     }
 
-                    gLastConfig.matrix.forEach(obj => {
+                    gLastConfig.matrix.forEach(function(obj) {
                         $(`#${obj.name}`).val(obj.value);
                     });
 
-                    $("#matrix input").on('input', (event)=>{
+                    $("#matrix input").on('input', function(event) {
                         gLastConfig.matrix = $("#matrix input").serializeArray();
                     });
                 }
